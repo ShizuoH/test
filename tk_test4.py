@@ -33,9 +33,6 @@ def search_treeview(treeview, query, parent=""):
     Search the given treeview for nodes that match the given query.
     """
     query = query.lower()  # Convert the query to lowercase
-    if query == "":
-        # If the query is empty, return all nodes
-        return treeview.get_children(parent)
     matching_nodes = []
     for node in treeview.get_children(parent):
         label = treeview.item(node)["text"].lower()  # Convert the node label to lowercase
@@ -50,14 +47,17 @@ def on_search_box_changed(event):
     """
     Called when the search box text is changed.
     """
-    query = search_box.get()
+    query = search_box.get().lower()
     if query == "":
         # If the query is empty, show all nodes
         show_treeview(treeview)
     else:
         # Otherwise, search the treeview for matching nodes
         matching_nodes = search_treeview(treeview, query)
-        show_treeview(treeview, matching_nodes)
+        if matching_nodes:
+            show_treeview(treeview, matching_nodes)
+        else:
+            treeview.delete(*treeview.get_children())
 
 
 # Define the data to populate the treeview
@@ -89,7 +89,3 @@ populate_treeview(treeview, data)
 # Create a search box and bind it to the search function
 search_box = tk.Entry(root)
 search_box.pack(fill="x")
-search_box.bind("<KeyRelease>", on_search_box_changed)
-
-# Start the main loop
-root.mainloop()
