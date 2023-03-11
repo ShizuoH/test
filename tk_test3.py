@@ -14,15 +14,15 @@ def populate_treeview(treeview, parent, dictionary):
             # This node doesn't have children, so just add it to the parent
             treeview.insert(parent, "end", text=key, values=(value))
 
-def search_treeview(treeview, query):
+def search_treeview(treeview, query, parent=""):
     """
     Search the given treeview for nodes that match the given query.
     """
     if query == "":
         # If the query is empty, return all nodes
-        return treeview.get_children()
+        return treeview.get_children(parent)
     matching_nodes = []
-    for node in treeview.get_children():
+    for node in treeview.get_children(parent):
         if query.lower() in treeview.item(node)["text"].lower():
             # If the query is found in the node text, add the node to the results
             matching_nodes.append(node)
