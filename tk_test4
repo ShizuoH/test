@@ -1,0 +1,101 @@
+import tkinter as tk
+
+data = {
+    "Key 1": {
+        "Subkey 1": {
+            "Value 1": "foo",
+            "Value 2": "bar",
+        },
+        "Subkey 2": {
+            "Value 3": "baz",
+            "Value 4": "qux",
+        },
+    },
+    "Key 2": {
+        "Subkey 3": {
+            "Value 5": "spam",
+            "Value 6": "ham",
+        },
+        "Subkey 4": {
+            "Value 7": "eggs",
+            "Value 8": "toast",
+        },
+    },
+}
+
+
+def build_treeview(parent, node):
+    """
+    Recursively build a treeview widget from the given node and add it to the parent widget.
+    """
+    for key, value in node.items():
+        if isinstance(value, dict):
+            # If the value is a dictionary, create a new tree node and recurse
+            tree_node = parent.insert("", "end", text=key)
+            build_treeview(parent, value)
+            parent.item(tree_node, open=True)  # Expand the tree node by default
+        else:
+            # If the value is not a dictionary, create a new leaf node
+            parent.insert("", "end", text=key, values=(value,))
+
+
+def show_treeview(treeview, nodes=None):
+    """
+    Show the specified nodes in the treeview, and hide all other nodes.
+    If nodes is None, show all nodes.
+    """
+    for node in treeview.get_children():
+        if nodes is None or node in nodes:
+            treeview.item(node, open=True)  # Show the node
+            parent_node = treeview.parent(node)
+            while parent_node:
+                # Show all ancestor nodes of the current node
+                treeview.item(parent_node, open=True)
+                parent_node = treeview.parent(parent_node)
+        else:
+            treeview.item(node, open=False)  # Hide the node
+
+
+def search_treeview(treeview, query, parent=""):
+    """
+    Search the given treeview for nodes that match the given query.
+    """
+    query = query.lower()  # Convert the query to lowercase
+    if query == "":
+        # If the query is empty, return all nodes
+        return treeview.get_children(parent)
+    matching_nodes = []
+    for node in treeview.get_children(parent):
+        label = treeview.item(node)["text"].lower()  # Convert the node label to lowercase
+        if query in label:
+            # If the query is found in the node text, add the node to the results
+            matching_nodes.append(node)
+        matching_nodes.extend(search_treeview(treeview, query, node))
+    return matching_nodes
+
+
+def on_search_box_changed(event):
+    """
+    Called when the search box text is changed.
+    """
+    query = search_box.get()
+    if query == "":
+        # If the query is empty, show all nodes
+        show_treeview(treeview)
+    else:
+        # Otherwise, search the treeview for matching nodes
+        matching_nodes = search_treeview(treeview, query)
+        show_treeview(treeview, matching_nodes)
+
+
+# Create the main window
+root = tk.Tk()
+root.title("Treeview Example")
+
+# Create the search box and pack it at the top of the window
+search_box = tk.Entry(root)
+search_box.pack(side="top", fill="x")
+search_box.bind("<KeyRelease>", on_search_box_changed)
+
+# Create the treeview widget and pack it in the window
+treeview
